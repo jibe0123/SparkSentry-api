@@ -42,6 +42,7 @@ func main() {
 	systemRepo := repository.NewSystemRepository(database.DB)
 	equipmentRepo := repository.NewEquipmentRepository(database.DB)
 	areaRepo := repository.NewAreaRepository(database.DB)
+	paramRepo := repository.NewParamRepository(database.DB)
 
 	// Auth features
 	authService := services.NewAuthService(*userRepo)
@@ -55,7 +56,7 @@ func main() {
 	userService := services.NewUserService(*userRepo, *accountRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
-	buildingService := services.NewBuildingService(*buildingRepo, *systemRepo, *equipmentRepo, areaRepo)
+	buildingService := services.NewBuildingService(*buildingRepo, *systemRepo, *equipmentRepo, areaRepo, *paramRepo)
 	buildingHandler := handlers.NewBuildingHandler(accountService, &buildingService)
 
 	router := app.SetupRouter(authHandler, accountHandler, userHandler, buildingHandler, userRepo)

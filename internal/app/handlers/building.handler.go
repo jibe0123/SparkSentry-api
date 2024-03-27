@@ -64,7 +64,7 @@ func (h *BuildingHandler) GetAllBuildings(c *gin.Context) {
 // AddArea handles the request to add one or more new areas to their respective buildings.
 func (h *BuildingHandler) AddArea(c *gin.Context) {
 	var requestDTO dto.AreaCreateDTO
-	buildingID, err := strconv.ParseUint(c.Param("building_id"), 10, 32)
+	buildingID, err := strconv.Atoi(c.Param("building_id"))
 	if err := c.ShouldBindJSON(&requestDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -81,8 +81,7 @@ func (h *BuildingHandler) AddArea(c *gin.Context) {
 
 // GetAreasByBuildingID handles the request to retrieve areas for a specific building
 func (h *BuildingHandler) GetAreasByBuildingID(c *gin.Context) {
-	buildingIdParam := c.Param("building_id")
-	buildingID, err := strconv.ParseUint(buildingIdParam, 10, 64)
+	buildingID, err := strconv.Atoi(c.Param("building_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid building ID"})
 		return
@@ -99,8 +98,7 @@ func (h *BuildingHandler) GetAreasByBuildingID(c *gin.Context) {
 
 // UpdateArea handles the PUT request to update an area's details.
 func (h *BuildingHandler) UpdateArea(c *gin.Context) {
-	areaIDParam := c.Param("area_id")
-	areaID, err := strconv.ParseUint(areaIDParam, 10, 64)
+	areaID, err := strconv.Atoi(c.Param("area_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid area ID"})
 		return
@@ -285,4 +283,44 @@ func (h *BuildingHandler) DeleteEquipment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Equipment removed successfully"})
+}
+
+// CreateParameter creates a new parameter for a specific piece of equipment.
+func (h *BuildingHandler) CreateParameter(c *gin.Context) {
+	equipmentID, err := strconv.Atoi(c.Param("equipment_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid equipment ID"})
+		return
+	}
+
+	var parameterDTO dto.ParameterCreateDTO
+	if err := c.ShouldBindJSON(&parameterDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.buildingService.CreateParameter(uint(equipmentID), parameterDTO)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create parameter"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Parameter created successfully"})
+}
+
+// GetParametersByEquipmentID returns all parameters from equipmentID
+func (h *BuildingHandler) GetParametersByEquipmentID(c *gin.Context) {
+	equipmentID, err := strconv.Atoi(c.Param("equipment_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid system ID"})
+		return
+	}
+
+	equipments, err := h.buildingService.GetParametersByEquipmentID(uint(equipmentID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve equipments"})
+		return
+	}
+
+	c.JSON(http.StatusOK, equipments)
 }
