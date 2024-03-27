@@ -49,6 +49,12 @@ type BuildingService interface {
 
 	// DeleteEquipment deletes the specified piece of equipment.
 	DeleteEquipment(equipmentID uint) error
+
+	// CreateParameter creates a new parameter for a given equipment.
+	CreateParameter(equipmentID uint, dto dto.ParameterCreateDTO) error
+
+	// GetParametersByEquipmentID returns all parameters for a given equipment.
+	GetParametersByEquipmentID(equipmentID uint) ([]entities.Parameter, error)
 }
 
 type buildingService struct {
@@ -56,11 +62,12 @@ type buildingService struct {
 	buildingRepo  repository.BuildingRepository
 	systemRepo    repository.SystemRepository
 	equipmentRepo repository.EquipmentRepository
+	paramRepo     repository.ParameterRepository
 }
 
 // NewBuildingService creates a new instance of BuildingService.
-func NewBuildingService(buildingRepo repository.BuildingRepository, systemRepo repository.SystemRepository, equipmentRepo repository.EquipmentRepository, areaRepo repository.AreaRepository) BuildingService {
-	return &buildingService{buildingRepo: buildingRepo, systemRepo: systemRepo, equipmentRepo: equipmentRepo, areaRepo: areaRepo}
+func NewBuildingService(buildingRepo repository.BuildingRepository, systemRepo repository.SystemRepository, equipmentRepo repository.EquipmentRepository, areaRepo repository.AreaRepository, paramRepo repository.ParameterRepository) BuildingService {
+	return &buildingService{buildingRepo: buildingRepo, systemRepo: systemRepo, equipmentRepo: equipmentRepo, areaRepo: areaRepo, paramRepo: paramRepo}
 }
 
 // CreateBuilding creates a new Building with at least one Area from a DTO.
@@ -166,4 +173,14 @@ func (s *buildingService) UpdateEquipment(equipmentID uint, dto dto.EquipmentUpd
 // DeleteEquipment deletes the specified piece of equipment.
 func (s *buildingService) DeleteEquipment(equipmentID uint) error {
 	return s.equipmentRepo.DeleteEquipment(equipmentID)
+}
+
+// CreateParameter creates a new parameter for a given equipment.
+func (s *buildingService) CreateParameter(equipmentID uint, dto dto.ParameterCreateDTO) error {
+	return s.paramRepo.CreateParameter(equipmentID, dto)
+}
+
+// GetParametersByEquipmentID returns all parameters for a given equipment.
+func (s *buildingService) GetParametersByEquipmentID(equipmentID uint) ([]entities.Parameter, error) {
+	return s.paramRepo.FindByEquipmentID(equipmentID)
 }
